@@ -1,6 +1,7 @@
 import 'dart:io' ;
 import 'package:conduit_core/conduit_core.dart' ;
 import 'package:conduit_postgresql/conduit_postgresql.dart';
+import 'package:dart_auth/utils/app_utils.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:conduit/conduit.dart';
 
@@ -19,22 +20,32 @@ class AppAuthController extends ResourceController {
         message: "Поля password username обязательны"
       ));
     }
-
-    final User fetchedUser = User();
-
-    // connect to DB
-    // find user
-    // check password
-    // fetch user
-
-    return Response.ok(
-      AppResponseModel(data: {
-        "id": fetchedUser.id,
-        "refreshToken": fetchedUser.refreshToken,
-        "accessToken": fetchedUser.accessToken,
-      }, message: "Успешная авторизация"
-        ).toJson(),
-    );
+    try {
+      final qFindUser = Query<User>(managedContext)
+    ..where((table) => table.username).equalTo(user.username)
+    ..returningProperties(
+      (table) => [table.id, table.salt, table.hashPassword]);
+    final findUser = await qFindUser.fetchOne();
+    if (findUser == null) {
+      throw QueryException.conflict("Пользователь не найден", []);
+    }
+    final requestHashPassword = generatePasswordHash(
+      user.password ?? "", findUser.salt ?? "");
+    if (requestHashPassword == findUser.hashPassword) {
+      await _updateTokens(findUser.id ?? -1, managedContext);
+      final newUser = 
+        await managedContext.fetchObjectWithID<User>(findUser.id);
+      return Response.ok(AppResponseModel(
+        data: newUser?.backing.contents,
+        message: "Успешная авторизация"));
+    } else {
+      throw QueryException.input("Пароль неверный", []);
+    }
+    } on QueryException catch (error) {
+      return Response.serverError(
+        body: AppResponseModel(message: error.message)
+      );
+    }
   }
 
   @Operation.put()
@@ -56,12 +67,7 @@ class AppAuthController extends ResourceController {
         ..values.hashPassword = hashPassword;
         final createdUser = await qCreateUser.insert();
         id = createdUser.asMap()["id"];
-        final Map<String, dynamic> tokens = _getTokens(id);
-        final qUpdateTokens = Query<User>(transaction)
-          ..where((user) => user.id).equalTo(id)
-          ..values.accessToken = tokens["access"]
-          ..values.refreshToken = tokens["refresh"];
-        await qUpdateTokens.updateOne();
+        await _updateTokens(id, transaction);
       });
       final userData = await managedContext.fetchObjectWithID<User>(id);
       return Response.ok(
@@ -76,24 +82,29 @@ class AppAuthController extends ResourceController {
     }
   }
 
+  Future<void> _updateTokens(int id, ManagedContext transaction) async {
+    final Map<String, dynamic> tokens = _getTokens(id);
+    final qUpdateTokens = Query<User>(transaction)
+      ..where((user) => user.id).equalTo(id)
+      ..values.accessToken = tokens["access"]
+      ..values.refreshToken = tokens["refresh"];
+    await qUpdateTokens.updateOne();
+  }
+
   @Operation.post("refresh")
   Future<Response> refreshToken(
     @Bind.path("refresh") String refreshToken) async {
-    final User fetchedUser = User();
-    
-    // connect to DB
-    // find user
-    // check token
-    // fetch user
-
-    return Response.ok(
-      AppResponseModel(data: {
-        "id": fetchedUser.id,
-        "refreshToken": fetchedUser.refreshToken,
-        "accessToken": fetchedUser.accessToken,
-      }, message: "Успешное обновление токенов"
-        ).toJson(),
-    );
+    try {
+      final id = AppUtils.getIdFromToken(refreshToken);
+      await _updateTokens(id, managedContext);
+      final user = await managedContext.fetchObjectWithID<User>(id);
+      return Response.ok(AppResponseModel(
+        data: user?.backing.contents,
+        message: "Успешное обновление токенов"));
+    } catch (error) {
+      return Response.serverError(
+        body: AppResponseModel(message: error.toString()));
+    }
   }
   
   Map<String, dynamic> _getTokens(int id) {
