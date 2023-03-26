@@ -2,6 +2,8 @@ import 'dart:io' ;
 import 'package:conduit_core/conduit_core.dart' ;
 import 'package:conduit_postgresql/conduit_postgresql.dart';
 import 'package:dart_auth/controllers/app_auth_controller.dart';
+import 'package:dart_auth/controllers/app_token_controller.dart';
+import 'package:dart_auth/controllers/app_user_controller.dart';
 
 class AppService extends ApplicationChannel {
   late final ManagedContext managedContext;
@@ -14,9 +16,12 @@ class AppService extends ApplicationChannel {
   }
 
   @override
-  Controller get entryPoint => Router()..route("token/[:refresh]").link(
-      () => AppAuthController(managedContext), 
-    );
+  Controller get entryPoint => Router()
+    ..route("token/[:refresh]")
+        .link(() => AppAuthController(managedContext),)
+    ..route("user")
+        .link(() => AppTokenController())!
+        .link(() => AppUserController(managedContext));
   
   PostgreSQLPersistentStore _initDatabase() {
     final username = Platform.environment["DB_USERNAME"] ?? "admin";
