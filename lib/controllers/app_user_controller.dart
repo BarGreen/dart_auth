@@ -1,13 +1,12 @@
 import 'dart:io' ;
 import 'package:conduit_core/conduit_core.dart' ;
-import 'package:conduit_postgresql/conduit_postgresql.dart';
-import 'package:dart_auth/utils/app_utils.dart';
-import 'package:jaguar_jwt/jaguar_jwt.dart';
-import 'package:conduit/conduit.dart';
 
-import '../models/response_model.dart';
+import 'package:dart_auth/utils/app_const.dart';
+import 'package:dart_auth/utils/app_utils.dart';
+import 'package:dart_auth/utils/app_response.dart';
+
 import '../models/user.dart';
-import '../utils/app_response.dart';
+
 
 class AppUserController extends ResourceController {
   final ManagedContext managedContext;
@@ -15,13 +14,20 @@ class AppUserController extends ResourceController {
   AppUserController(this.managedContext);
 
   @Operation.get()
-  Future<Response> getProfile() async {
-      try {
-        return AppResponse.ok(message: "getProfile");
-      } catch (error) {
-        return AppResponse.serverError(error);
-      }
+  Future<Response> getProfile(
+      @Bind.header(HttpHeaders.authorizationHeader) String header) async {
+    try {
+      final id = AppUtils.getIdFromHeader(header);
+      final user = await managedContext.fetchObjectWithID<User>(id);
+      user?.removePropertiesFromBackingMap(
+          [AppConst.accessToken, AppConst.refreshToken]);
+      return AppResponse.ok(
+          message: "Успешное получение профиля", body: user?.backing.contents);
+    } catch (error) {
+      return AppResponse.serverError(error,
+          message: "Ошибка получения профиля");
     }
+  }
 
   @Operation.post()
   Future<Response> updateProfile() async {
