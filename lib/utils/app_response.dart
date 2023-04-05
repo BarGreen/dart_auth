@@ -1,5 +1,5 @@
 import 'dart:io' ;
-import 'package:conduit_core/conduit_core.dart' ;
+import 'package:conduit/conduit.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
 import '../models/response_model.dart';
@@ -33,5 +33,8 @@ class AppResponse extends Response {
 
   AppResponse.badRequest({String? message}) 
   : super.badRequest(body: AppResponseModel(message: message ?? "Ошибка запроса"));
+
+  AppResponse.unauthorized(dynamic error, {String? message}) 
+  : super.unauthorized(body: _getResponseModel(error, message));
 
 }

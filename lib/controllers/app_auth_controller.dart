@@ -1,10 +1,8 @@
-import 'dart:io' ;
-import 'package:conduit_core/conduit_core.dart' ;
-import 'package:conduit_postgresql/conduit_postgresql.dart';
-import 'package:dart_auth/utils/app_const.dart';
+import 'package:conduit/conduit.dart';
+import 'package:dart_auth/utils/app_env.dart';
 import 'package:dart_auth/utils/app_utils.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
-import 'package:conduit/conduit.dart';
+
 
 import '../models/response_model.dart';
 import '../models/user.dart';
@@ -109,11 +107,9 @@ class AppAuthController extends ResourceController {
   }
   
   Map<String, dynamic> _getTokens(int id) {
-    final key = AppConst.secretKey;
+    final key = AppEnv.secretKey;
     final accessClaimSet = JwtClaim(
-      maxAge: Duration(hours: 1),
-      otherClaims: {"id": id}
-    );
+      maxAge: Duration(minutes: AppEnv.time), otherClaims: {"id": id});
     final refreshClaimSet = JwtClaim(
       otherClaims: {"id": id}
     );

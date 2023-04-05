@@ -31,7 +31,7 @@
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
-          <stringProp name="HTTPSampler.port">8080</stringProp>
+          <stringProp name="HTTPSampler.port">6100</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>
@@ -44,18 +44,18 @@
           <collectionProp name="Arguments.arguments">
             <elementProp name="debug_username" elementType="Argument">
               <stringProp name="Argument.name">debug_username</stringProp>
-              <stringProp name="Argument.value">5j30k627</stringProp>
+              <stringProp name="Argument.value">j81dikki</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="debug_password" elementType="Argument">
               <stringProp name="Argument.name">debug_password</stringProp>
-              <stringProp name="Argument.value">6d48k5d8</stringProp>
+              <stringProp name="Argument.value">3d05f160</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
           </collectionProp>
         </Arguments>
         <hashTree/>
-        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="UC01_Регистрация" enabled="false">
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="UC01_Регистрация" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
         </TransactionController>
@@ -520,7 +520,7 @@
           </DebugSampler>
           <hashTree/>
         </hashTree>
-        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="UC06_Обновление_пароля" enabled="true">
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="UC06_Обновление_пароля" enabled="false">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
         </TransactionController>

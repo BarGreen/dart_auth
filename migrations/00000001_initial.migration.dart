@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:conduit_core/conduit_core.dart';
+import 'package:conduit/conduit.dart';
 
 
 class Migration1 extends Migration { 

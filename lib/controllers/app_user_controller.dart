@@ -1,5 +1,5 @@
 import 'dart:io' ;
-import 'package:conduit_core/conduit_core.dart' ;
+import 'package:conduit/conduit.dart';
 
 import 'package:dart_auth/utils/app_const.dart';
 import 'package:dart_auth/utils/app_utils.dart';
